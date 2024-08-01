@@ -1,0 +1,48 @@
+﻿@model IEnumerable<LibraryRepository.Models.Library>
+
+@{
+    ViewData["Title"] = "Libraries list";
+}
+
+<h1>Libraries list</h1>
+
+<p>
+    <a asp-action="Create">Create New Library</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Genre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShelvesList)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var Library in Model) {
+        <tr>
+            <td>
+                @Library.Id
+            </td>
+            <td>
+                @Library.Genre
+            </td>
+            <td>
+                @Library.ShelvesList.Count()
+            </td>
+                <td>
+                    <a asp-action="AddShelf" asp-route-id="@Library.Id" class="btn btn-primary">Add Shelf</a>
+                </td>
+                <td>
+                    <a asp-action="CreateBook" asp-route-id="@Library.Id" class="btn btn-primary">Create Book</a>
+                </td>
+        </tr>
+}
+    </tbody>
+</table>
