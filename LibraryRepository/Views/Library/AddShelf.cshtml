@@ -16,8 +16,8 @@
         <input asp-for="Height" class="form-control" />
         <span asp-validation-for="Height" class="text-danger"></span>
     </div>
-    <input hidden asp-for="LibId" value="@ViewBag.id" />
     <div class="form-group">
+        <input type="hidden" asp-for="Library.Id"/>
         <input type="submit" value="Add" class="btn btn-primary" />
     </div>
 </form>

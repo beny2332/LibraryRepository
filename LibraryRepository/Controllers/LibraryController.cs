@@ -9,86 +9,135 @@ namespace LibraryRepository.Controllers
     {
         public IActionResult Index()
         {
-            List<Library> libraries = Data.Get.Libraries.Include(lib => lib.ShelvesList).ToList();
+            List<Library> libraries = Data.Get.Libraries
+                .Include(libraries => libraries.ShelfList)
+                .ToList();
             return View(libraries);
         }
+
+        // GET Library/Create
         public IActionResult Create() 
         {
-            return View(new Library());
+            return View();
         }
+
+        // POST Library/Create
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Create(Library library)
         { 
+            if (library == null)
+            {
+                return BadRequest();
+            }
             Data.Get.Libraries.Add(library);
             Data.Get.SaveChanges();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index"); // (nameof(Index))
         }
-        public IActionResult CreateBook(int id)
-        {
-            Library? library = Data.Get.Libraries.Find(id);
-            if (library == null)
-            {
-                return NotFound();
-            }
-            ViewBag.id = id;
 
-            return View(new Book());
-        }
-        public IActionResult AddShelf(int id) 
+        // GET Library/AddShelf
+        public IActionResult AddShelf(int libraryId) 
         {
-            Library? library = Data.Get.Libraries.Find(id);
+            Library? library = Data.Get.Libraries.FirstOrDefault(lib => lib.Id == libraryId);
             if (library == null)
             {
                 return NotFound();
             }
-            ViewBag.id = id;
             
-            return View(new Shelf());
+            return View(new Shelf { Library = library });
         }
+
+        // POST Library/AddShelf
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult AddShelf(Shelf newShelf)
+        public IActionResult AddShelf(Shelf shelf)
         {
-            Library library = Data.Get.Libraries.FirstOrDefault(l => l.Id == newShelf.LibId);
-            if (ModelState.IsValid)
+            Library? library = Data.Get.Libraries.FirstOrDefault(lib => lib.Id == shelf.Library.Id);
+            if (library == null)
             {
-                newShelf.Id = 0;
-                newShelf.library = library;
-                Data.Get.Shelves.Add(newShelf);
-                Data.Get.SaveChanges();
-            }
-            return RedirectToAction("Index");
+                return NotFound();
+            }    
+            shelf.Library = library;
+            Data.Get.Shelves.Add(shelf);
+            Data.Get.SaveChanges();
+            
+            return RedirectToAction(nameof(Details), new {id = shelf.Library.Id});
         }
 
-        //[HttpPost, ValidateAntiForgeryToken]
-        //public IActionResult AddShelf(Library libraryFromRequst, Shelf newShelf) 
-        //{
-        //    Library? libraryFromDb = Data.Get.Libraries.Find(libraryFromRequst);
-        //    return RedirectToAction("Index");
-        //}
-        //public IActionResult AddShelf(int? id) 
-        //{
-        //    if (id == null) 
-        //    {
-        //        return RedirectToAction("Index");
-        //    }
-        //    Library? library = Data.Get.Libraries.Include(s=> s.ShelvesList).FirstOrDefault(library=> library.Id == id);
-        //    if (library == null) 
-        //    {
-        //        return RedirectToAction("Index");
+        // GET Library/Details
+        public IActionResult Details(int id) 
+        {
+            Library? library = Data.Get.Libraries
+                .Include(lib => lib.ShelfList)
+                .ThenInclude(shelf => shelf.BookList)
+                .FirstOrDefault(lib => lib.Id == id);
 
-        //    }
-        //    return View(library);
-        //}
+            if (library == null) 
+            {
+                return NotFound();
+            }
+            return View(library);
+        }
+
+        // GET Library/AddBook?shelfId
+        public IActionResult AddBook(int shelfId)
+        {
+            Shelf? shelf = Data.Get.Shelves
+                .Include(s => s.Library)
+                .FirstOrDefault(slf => slf.Id == shelfId);
+            if (shelf == null)
+            {
+                return NotFound();
+            }
+            Book book = new Book { Shelf = shelf };
+            return View(book);
+        }
+
+        // POST Library/AddBook
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult AddBook(Book book)
+        {
+            if (book != null && book.Shelf != null)
+            {
+                Shelf? shelf = Data.Get.Shelves
+                    .Include(slf => slf.BookList)
+                    .FirstOrDefault(slf => slf.Id == book.Shelf.Id);
+
+                if (shelf == null)
+                {
+                    return NotFound();
+                }
+
+                if (book.Height > shelf.Height)
+                {
+                    ModelState.AddModelError("", "Book is too high for this shelf!");
+                    return View(book);
+                }
+
+                int totalBookWidth = shelf.BookList.Sum(b => b.Width) + book.Width;
+                if (totalBookWidth > shelf.Width)
+                {
+                    ModelState.AddModelError("", "Book cannot be inserted!");
+                    return View(book);
+                }
+
+                shelf.BookList.Add(book);
+                book.Shelf = shelf;
+                Data.Get.Books.Add(book);
+                Data.Get.SaveChanges();
+
+                return RedirectToAction(nameof(Details), new { id = shelf.Library.Id });
+            }
+            return View(book);
+        }
     }
 }
 
-        //public IActionResult AddShelf(int id)
-        //{
-        //    var library = Data.Get.Libraries.Find(id);
-        //    if (library == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var model = new ShelfViewModel { LibraryId = id };
-        //    return View(model);
-        //}
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       

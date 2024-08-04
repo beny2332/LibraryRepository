@@ -6,19 +6,20 @@ namespace LibraryRepository.Models
     {
         public Library() 
         {
-            ShelvesList = new List<Shelf>();
+            ShelfList = new List<Shelf>();
         }
         [Key]
         public int Id { get; set; }
 
         [Display(Name ="Library Genre")]
-        public string Genre { get; set; }
+        public string Genre { get; set; } = string.Empty;
+        
         [Display(Name ="Shelves")]
-        public List<Shelf> ShelvesList { get; set; }
+        public List<Shelf> ShelfList { get; set; }
         public void AddShelf(int width, int height) 
         {
             Shelf newShelf = new Shelf {Width = width, Height=height};
-            ShelvesList.Add(newShelf);
+            ShelfList.Add(newShelf);
         }
         
     }

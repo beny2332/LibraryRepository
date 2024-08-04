@@ -13,24 +13,38 @@ namespace LibraryRepository.DAL
 
         private void Seed()
         {
-            Library library = AddDefaultLibrary();
-            SaveChanges();
-        }
-
-        private Library AddDefaultLibrary()
-        {
-            Library library;
             if (!Libraries.Any())
             {
-                library = new Library {Genre = "Tanch/Bible" };
+                Library library = new Library { Genre = "fantazy"};
+                library.ShelfList = CreateDefultShelfList(library);
                 Libraries.Add(library);
+                SaveChanges();
             }
-            else
-            {
-                library = Libraries.First();
-            }
-            return library;
         }
+        private List<Shelf> CreateDefultShelfList(Library library) 
+        {
+            List<Shelf> shelfList = new List<Shelf>();
+
+            Shelf shelf = new Shelf { Height = 50, Width = 100, Library = library};
+
+            shelf.BookList = CreateDefultBookList(shelf);
+
+            shelfList.Add(shelf);
+            Shelves.Add(shelf);
+            return shelfList;
+        }
+        private List<Book> CreateDefultBookList(Shelf shelf) 
+        {
+            List<Book> bookList = new List<Book>();
+
+            Book book = new Book { Height = 10, Width = 4, Title = "Harry Potter", Shelf = shelf};
+
+            bookList.Add(book);
+            Books.Add(book);
+
+            return bookList;
+        }
+
 
 
         private static DbContextOptions GetOptions(string connectionString)

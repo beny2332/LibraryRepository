@@ -19,30 +19,31 @@
                 @Html.DisplayNameFor(model => model.Genre)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ShelvesList)
+                @Html.DisplayNameFor(model => model.ShelfList)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var Library in Model) {
+@foreach ( Library item in Model) {
         <tr>
             <td>
-                @Library.Id
+                @Html.DisplayFor(modelItem => item.Id)
             </td>
             <td>
-                @Library.Genre
+                    @Html.DisplayFor(modelItem => item.Genre)
             </td>
             <td>
-                @Library.ShelvesList.Count()
+                    @Html.DisplayFor(modelItem => item.ShelfList.Count)
             </td>
-                <td>
-                    <a asp-action="AddShelf" asp-route-id="@Library.Id" class="btn btn-primary">Add Shelf</a>
-                </td>
-                <td>
-                    <a asp-action="CreateBook" asp-route-id="@Library.Id" class="btn btn-primary">Create Book</a>
-                </td>
-        </tr>
+               
+           
+               <td>
+                    @Html.ActionLink("Library details", "Details", new { id = item.Id }, new { @class = "btn btn-primary" }) 
+                    @Html.ActionLink("Add new shelf", "AddShelf", new { libraryId = item.Id }, new { @class = "btn btn-primary" })
+
+               </td>
+    </tr>
 }
     </tbody>
 </table>
